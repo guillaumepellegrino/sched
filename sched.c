@@ -29,7 +29,6 @@ static const char *procname(int pid) {
     char *ptr = buff;
     ssize_t len = 0;
     int fd = -1;
-    bool rt = false;
 
     snprintf(buff, sizeof(buff), "/proc/%d/stat", pid);
     if ((fd = open(buff, O_RDONLY)) < 0) {
