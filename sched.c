@@ -69,7 +69,7 @@ static const char *policy2str(int policy) {
     }
 }
 
-void sched_print(int pid) {
+static void sched_print(int pid) {
     int policy = 0;
     struct sched_param param = {0};
 
@@ -84,7 +84,7 @@ void sched_print(int pid) {
 
 }
 
-void sched_list() {
+static void sched_list() {
     DIR *procdir = NULL;
     struct dirent *procent = NULL;
 
@@ -96,6 +96,29 @@ void sched_list() {
         }
         sched_print(pid);
     }
+}
+
+static void help() {
+    printf("Usage: sched [OPTION].. [PRIORITY]\n"
+            "Get, set or list process CPU scheduling and priority.\n"
+            "\n"
+            "Options:\n"
+            "  -p,--pid PID     Run command on the process with specified pid.\n"
+            "  -l,--list        List CPU scheduling from all processes.\n"
+            "  -o,--other       Set SCHED_OTHER scheduling.\n"
+            "  -f,--fifo        Set SCHED_FIFO scheduling.\n"
+            "  -r,--roundrobin  Set SCHED_RR scheduling.\n"
+            "\n"
+            "Examples:\n"
+            "  - Set RT FIFO scheduling with high priority (80) for iperf3 process:\n"
+            "      sched -p $(pidof iperf3) --fifo 80\n"
+            "  - Get iperf3 scheduling and priority:\n"
+            "      sched -p $(pidof iperf3)\n"
+            "  - List CPU schedling and priority from all running processes:\n"
+            "      sched --list\n"
+            "\n"
+          );
+
 }
 
 int main(int argc, char *argv[]) {
@@ -134,15 +157,14 @@ int main(int argc, char *argv[]) {
                 return 0;
             case 'h':
             default:
-                printf("sched [OPTION].. [PRIORITY]\n"
-                       "  -p,--pid PID\n"
-                       "  -l,--list\n"
-                       "  -o,--other\n"
-                       "  -f,--fifo\n"
-                       "  -r,--roundrobin\n"
-                        );
+                help();
                 return 1;
         }
+    }
+
+    if (pid <= 0) {
+        help();
+        return 1;
     }
 
     if (argc > optind) {
